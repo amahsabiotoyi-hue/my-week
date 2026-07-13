@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="The Standard">
+<meta name="theme-color" content="#2a78d6">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Sab's Week — The Standard</title>
+<style>
+  :root {
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --ink-1: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --accent: #2a78d6;
+    --accent-deep: #1c5cab;
+    --accent-soft: #cde2fb;
+    --good: #006300;
+    --gym: #eb6834;
+    --python: #2a78d6;
+    --pd: #4a3aa7;
+    --biz: #008300;
+    --tutor: #eda100;
+    --life: #e87ba4;
+    --rest: #898781;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --ink-1: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --accent: #3987e5;
+      --accent-deep: #86b6ef;
+      --accent-soft: #184f95;
+      --good: #0ca30c;
+      --gym: #d95926;
+      --python: #3987e5;
+      --pd: #9085e9;
+      --biz: #008300;
+      --tutor: #c98500;
+      --life: #d55181;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--ink-1);
+    line-height: 1.5;
+    padding: calc(16px + env(safe-area-inset-top)) 14px calc(56px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  header h1 { font-size: 1.45rem; letter-spacing: -0.02em; }
+  header p.sub { color: var(--ink-2); margin-top: 2px; font-size: 0.87rem; }
+
+  .streak-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-top: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .streak-num { font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
+  .streak-num small { display: block; font-size: 0.75rem; font-weight: 600; color: var(--ink-2); }
+  .dots { display: flex; gap: 7px; align-items: flex-end; }
+  .dotcol { text-align: center; }
+  .dotcol .d {
+    width: 26px; height: 26px; border-radius: 50%;
+    background:
+      conic-gradient(var(--accent) calc(var(--p) * 1%), var(--grid) 0);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .dotcol .d::after {
+    content: ""; position: absolute; inset: 4px; border-radius: 50%;
+    background: var(--surface-1);
+  }
+  .dotcol .d.full::before {
+    content: "✓"; position: absolute; z-index: 1; font-size: 0.7rem; font-weight: 800; color: var(--good);
+  }
+  .dotcol .d.today-ring { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .dotcol span { font-size: 0.62rem; color: var(--muted); display: block; margin-top: 4px; }
+
+  .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 14px 0 4px; }
+  .pillar { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 0.78rem; }
+  .pillar b { display: block; font-size: 0.95rem; }
+  .pillar span { color: var(--ink-2); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+
+  .tabs { display: flex; gap: 6px; margin: 20px 0 12px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .tab {
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--ink-2);
+    border-radius: 999px; padding: 9px 15px; font-size: 0.88rem; cursor: pointer;
+    font-weight: 600; flex-shrink: 0;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .daycard { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+  .daycard h2 { font-size: 1.1rem; }
+  .daycard .theme { color: var(--ink-2); font-size: 0.85rem; margin-bottom: 12px; }
+
+  .progress-row { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; }
+  .bar { flex: 1; height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 4px; transition: width .25s; }
+  .bar-label { font-size: 0.78rem; color: var(--ink-2); white-space: nowrap; }
+
+  .block { display: grid; grid-template-columns: 92px 4px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--grid); align-items: start; }
+  .block:last-of-type { border-bottom: none; }
+  .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.76rem; padding-top: 2px; }
+  .rail { width: 4px; border-radius: 2px; align-self: stretch; }
+  .what b { font-size: 0.9rem; }
+  .what small { display: block; color: var(--ink-2); font-size: 0.79rem; }
+
+  h3.section { margin: 24px 0 8px; font-size: 1rem; }
+  .checks { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 4px 16px; }
+  .check { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--grid); cursor: pointer; }
+  .check:last-child { border-bottom: none; }
+  .check input { width: 22px; height: 22px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .check span { font-size: 0.9rem; }
+  .check.done span { color: var(--muted); text-decoration: line-through; }
+  .reset-note { color: var(--muted); font-size: 0.74rem; margin-top: 8px; }
+
+  .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
+  .panel h4 { font-size: 0.95rem; margin-bottom: 6px; }
+  .panel p, .panel li { font-size: 0.85rem; color: var(--ink-2); }
+  .panel ol, .panel ul { padding-left: 18px; }
+  .panel li { margin: 5px 0; }
+  .panel b { color: var(--ink-1); }
+  .rule-num { display: inline-flex; width: 21px; height: 21px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.74rem; font-weight: 700; align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0; }
+  .rule { display: flex; align-items: flex-start; padding: 7px 0; }
+  .rule div { font-size: 0.85rem; color: var(--ink-2); }
+  .sprint-week { border-left: 3px solid var(--accent); padding-left: 12px; margin: 10px 0; }
+  .sprint-week h5 { font-size: 0.88rem; margin-bottom: 3px; }
+  .warn { border-left: 3px solid var(--tutor); padding-left: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sab's Week — The Standard</h1>
+    <p class="sub">4:30 wake · gym before work · deep work every evening · action over brainstorming</p>
+  </header>
+
+  <div class="streak-card">
+    <div class="streak-num"><span id="streak">0</span>🔥<small>perfect-day streak</small></div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="pillars">
+    <div class="pillar"><b><span class="dot" style="background:var(--python)"></span>Python</b><span>1 hr / day</span></div>
+    <div class="pillar"><b><span class="dot" style="background:var(--pd)"></span>Personal dev</b><span>1 hr / day</span></div>
+    <div class="pillar"><b><span class="dot" style="background:var(--biz)"></span>Business</b><span>14.5 hrs/wk</span></div>
+    <div class="pillar"><b><span class="dot" style="background:var(--tutor)"></span>Tutoring</b><span>30–40 min / day</span></div>
+    <div class="pillar"><b><span class="dot" style="background:var(--gym)"></span>Training</b><span>Gym ×5 · runs ×3</span></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="daycard">
+    <h2 id="day-name"></h2>
+    <p class="theme" id="day-theme"></p>
+    <div class="progress-row">
+      <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+      <div class="bar-label" id="bar-label">0 / 0</div>
+    </div>
+    <div id="blocks"></div>
+  </div>
+
+  <h3 class="section" id="checks-title">Non-negotiables</h3>
+  <div class="checks" id="checks"></div>
+  <p class="reset-note">Progress saves on this device automatically and each day gets its own checklist. A perfect day = every box ticked.</p>
+
+  <h3 class="section">The contract (read this when you want to skip)</h3>
+  <div class="panel">
+    <div class="rule"><span class="rule-num">1</span><div><b>No zero-action days.</b> Every business block ends with something <b>shipped</b> — a message sent, a call made, a page published, a person asked. Notes alone don't count.</div></div>
+    <div class="rule"><span class="rule-num">2</span><div><b>Never miss twice.</b> Missing one day is an accident; missing two is the start of a new (bad) habit.</div></div>
+    <div class="rule"><span class="rule-num">3</span><div><b>Shrink it, don't skip it.</b> Exhausted? Do the 15-minute version. The streak matters more than any single session's length.</div></div>
+    <div class="rule"><span class="rule-num">4</span><div><b>Phone sleeps outside the bedroom.</b> The 4:30 wake-up is won at the 10:00 PM lights-out.</div></div>
+    <div class="rule"><span class="rule-num">5</span><div><b>Sunday review, every Sunday.</b> Score the week 1–10, count shipped actions, set next week's #1 goal.</div></div>
+  </div>
+
+  <h3 class="section">2-week business sprint</h3>
+  <div class="panel">
+    <div class="sprint-week">
+      <h5>Week 1 — Pick &amp; validate</h5>
+      <ul>
+        <li><b>Days 1–2:</b> Brain-dump every idea. Score: excites you / people pay for it / startable with &lt; $200. Keep top 3.</li>
+        <li><b>Days 3–5:</b> Validate — talk to 5 potential customers per idea, check competitor pricing, estimate first-month cost.</li>
+        <li><b>Days 6–7:</b> Choose ONE. Define the smallest sellable version.</li>
+      </ul>
+    </div>
+    <div class="sprint-week">
+      <h5>Week 2 — Ship</h5>
+      <ul>
+        <li><b>Days 8–10:</b> Build the minimum: landing page, offer doc, or first package. Ugly is fine; done is the goal.</li>
+        <li><b>Days 11–12:</b> Put the offer in front of 10 real people.</li>
+        <li><b>Days 13–14:</b> First sale attempt. Adjust price/pitch. Log every response.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>Python restart (after the 3-month pause)</h4>
+    <p><b>Don't restart from zero.</b> Days 1–3: replay the finished half at 1.5–2× and redo one exercise per module. Day 4+: new material. Lunch breaks: optional 20-min drills.</p>
+  </div>
+
+  <div class="panel warn">
+    <h4>Honest note on sleep</h4>
+    <p>10:00 PM → 4:30 AM is <b>6.5 hours</b>. Weekend sleep-ins are the recovery valve. Dragging after two weeks? Move wake-up to 5:00 before dropping any block.</p>
+  </div>
+</div>
+
+<script>
+const DAYS = {
+  mon: {
+    name: "Monday", theme: "Gym day · full evening stack",
+    blocks: [
+      ["4:30–4:50","life","Wake + set the day","Water, no phone. Write down today's ONE business action."],
+      ["4:50–5:50","gym","Gym — 1 hr","Clothes were laid out last night. No decision to make — just go."],
+      ["5:50–6:45","rest","Shower · breakfast · out the door",""],
+      ["7:00–4:00","rest","Work","Optional: 20 min of Python drills at lunch."],
+      ["4:00–4:15","rest","Transition","Snack, change clothes. No couch, no scroll."],
+      ["4:15–5:15","python","Python — 1 hr","Course time. Deep work, phone in another room."],
+      ["5:15–5:45","tutor","Tutoring business — 30 min","Admin, outreach, or session prep with the guys."],
+      ["5:45–6:45","pd","Personal dev — 1 hr","Sales / conversation skills: course, book, or drills."],
+      ["6:45–7:15","life","Dinner",""],
+      ["7:15–8:15","life","Call your girlfriend — 1 hr","Protected. Being present here is part of the standard."],
+      ["8:15–9:45","biz","Business build — 90 min","Sprint work. Ends with a shipped action, not notes."],
+      ["9:45–10:00","rest","Shutdown","Log wins, lay out gym clothes, lights out at 10:00."]
+    ],
+    checks: ["Gym (morning)","Python — 1 hr","Personal dev — 1 hr","Tutoring — 30 min","Business 90 min + shipped one action","Called girlfriend","Lights out by 10:00 PM"]
+  },
+  tue: {
+    name: "Tuesday", theme: "Gym morning + evening run (run 1 of 3)",
+    blocks: [
+      ["4:30–4:50","life","Wake + set the day","Write down today's ONE business action."],
+      ["4:50–5:50","gym","Gym — 1 hr",""],
+      ["5:50–6:45","rest","Shower · breakfast · out the door",""],
+      ["7:00–4:00","rest","Work","Optional 20-min Python drill at lunch."],
+      ["4:00–4:15","rest","Transition",""],
+      ["4:15–5:15","python","Python — 1 hr",""],
+      ["5:15–5:45","tutor","Tutoring business — 30 min",""],
+      ["5:45–6:30","gym","Evening run — 45 min","Run WITH a sales/communication audiobook — this doubles as personal dev."],
+      ["6:30–7:00","life","Dinner",""],
+      ["7:00–8:00","life","Call your girlfriend — 1 hr",""],
+      ["8:00–9:30","biz","Business build — 90 min","Ends with a shipped action."],
+      ["9:30–9:50","pd","Personal dev wrap — 20 min","Notes + one takeaway from the run audiobook. (45 audio + 20 notes > 1 hr.)"],
+      ["9:50–10:00","rest","Shutdown","Lights out at 10:00."]
+    ],
+    checks: ["Gym (morning)","Evening run + audiobook","Python — 1 hr","Personal dev — audio + notes","Tutoring — 30 min","Business 90 min + shipped one action","Called girlfriend","Lights out by 10:00 PM"]
+  },
+  wed: { name: "Wednesday", theme: "Gym day · full evening stack", copyOf: "mon" },
+  thu: { name: "Thursday", theme: "Gym morning + evening run (run 2 of 3)", copyOf: "tue" },
+  fri: { name: "Friday", theme: "Gym day · full evening stack — finish the work-week strong", copyOf: "mon" },
+  sat: {
+    name: "Saturday", theme: "Heavy business day · morning run (3 of 3) · no gym — sleep-in earned",
+    blocks: [
+      ["6:00–6:30","life","Wake (recovery sleep-in)","You banked it. Enjoy it."],
+      ["6:30–7:15","gym","Morning run — 45 min","Run 3 of 3. Audiobook optional — the week's PD quota is already covered daily."],
+      ["7:15–8:15","rest","Breakfast + reset",""],
+      ["8:15–9:15","python","Python — 1 hr","Weekend session — good day for a bigger exercise or mini-project."],
+      ["9:15–10:15","pd","Personal dev — 1 hr","Practice on real people today: negotiate, ask, small-talk on errands."],
+      ["10:15–12:15","biz","Business sprint block 1 — 2 hrs","The big weekly push. Follow the 2-week sprint plan below."],
+      ["12:15–1:15","life","Lunch / break",""],
+      ["1:15–3:15","biz","Business sprint block 2 — 2 hrs","Ship something visible before this block ends."],
+      ["3:15–3:55","tutor","Tutoring business — 40 min","Weekly planning with the guys."],
+      ["4:00–10:30","life","Free — errands, girlfriend, friends","Whole evening is yours. Bed by 10:30."]
+    ],
+    checks: ["Morning run","Python — 1 hr","Personal dev — practiced on real people","Business — 4 hrs, shipped something visible","Tutoring — 40 min","Bed by 10:30 PM"]
+  },
+  sun: {
+    name: "Sunday", theme: "No gym — recovery, deep business work, weekly review",
+    blocks: [
+      ["6:30–7:00","life","Wake easy","Recovery morning. Body repairs; you still show up."],
+      ["7:30–8:30","python","Python — 1 hr",""],
+      ["8:30–9:30","pd","Personal dev — 1 hr",""],
+      ["9:30–12:30","biz","Business build — 3 hrs","Close out the sprint week: what got shipped, what's next."],
+      ["12:30–1:30","life","Lunch",""],
+      ["1:30–2:10","tutor","Tutoring business — 40 min",""],
+      ["2:10–2:40","rest","WEEKLY REVIEW — 30 min","Score the week 1–10. Count shipped actions. Set next week's #1 goal. Non-negotiable."],
+      ["2:40–9:00","life","Free — girlfriend, rest, meal prep","Lay out Monday: gym bag, lunches, tomorrow's ONE action."],
+      ["9:30","rest","Lights out EARLY","Bank sleep for Monday's 4:30."]
+    ],
+    checks: ["Python — 1 hr","Personal dev — 1 hr","Business — 3 hrs","Tutoring — 40 min","Weekly review done + week scored","Monday prepped (gym bag, lunches)","Lights out by 9:30 PM"]
+  }
+};
+for (const k in DAYS) { if (DAYS[k].copyOf) { const s = DAYS[DAYS[k].copyOf]; DAYS[k].blocks = s.blocks; DAYS[k].checks = s.checks; } }
+
+const ORDER = ["mon","tue","wed","thu","fri","sat","sun"];
+const KEY_PREFIX = "sabweek:v1:";
+
+// ---- storage (localStorage with in-memory fallback for sandboxed previews) ----
+const mem = {};
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return (k in mem) ? mem[k] : null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { mem[k] = v; } }
+};
+
+// ---- dates ----
+function isoDate(d) {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), dd = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${dd}`;
+}
+function dayKeyOf(d) { return ORDER[(d.getDay() + 6) % 7]; }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function weekMonday(d) { return addDays(d, -((d.getDay() + 6) % 7)); }
+
+const today = new Date();
+const monday = weekMonday(today);
+// each tab maps to a real date in the CURRENT week
+const dateForDay = {};
+ORDER.forEach((k, i) => dateForDay[k] = isoDate(addDays(monday, i)));
+
+function loadChecks(dateStr, dayKey) {
+  const raw = store.get(KEY_PREFIX + dateStr);
+  const n = DAYS[dayKey].checks.length;
+  if (raw) { try { const a = JSON.parse(raw); if (Array.isArray(a) && a.length === n) return a; } catch (e) {} }
+  return new Array(n).fill(false);
+}
+function saveChecks(dateStr, arr) { store.set(KEY_PREFIX + dateStr, JSON.stringify(arr)); }
+
+function dayStats(dateStr, dayKey) {
+  const a = loadChecks(dateStr, dayKey);
+  const done = a.filter(Boolean).length;
+  return { done, total: a.length, perfect: done === a.length && a.length > 0 };
+}
+
+// ---- streak: consecutive perfect days ending today (or yesterday if today isn't done yet) ----
+function calcStreak() {
+  let streak = 0;
+  let d = new Date(today);
+  const t = dayStats(isoDate(d), dayKeyOf(d));
+  if (!t.perfect) d = addDays(d, -1); // today still in progress — don't break the streak
+  for (let i = 0; i < 3650; i++) {
+    const s = dayStats(isoDate(d), dayKeyOf(d));
+    if (s.perfect) { streak++; d = addDays(d, -1); } else break;
+  }
+  return streak;
+}
+
+let current = dayKeyOf(today);
+
+const tabsEl = document.getElementById("tabs");
+ORDER.forEach(d => {
+  const b = document.createElement("button");
+  b.className = "tab"; b.textContent = DAYS[d].name.slice(0,3);
+  b.onclick = () => { current = d; render(); };
+  b.dataset.day = d;
+  tabsEl.appendChild(b);
+});
+
+function renderStreak() {
+  document.getElementById("streak").textContent = calcStreak();
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  const names = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(today, -i);
+    const s = dayStats(isoDate(d), dayKeyOf(d));
+    const pct = s.total ? Math.round(100 * s.done / s.total) : 0;
+    const col = document.createElement("div");
+    col.className = "dotcol";
+    const dot = document.createElement("div");
+    dot.className = "d" + (s.perfect ? " full" : "") + (i === 0 ? " today-ring" : "");
+    dot.style.setProperty("--p", pct);
+    const lab = document.createElement("span");
+    lab.textContent = i === 0 ? "today" : names[d.getDay()];
+    col.appendChild(dot); col.appendChild(lab);
+    dotsEl.appendChild(col);
+  }
+}
+
+function render() {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.day === current));
+  const day = DAYS[current];
+  const dateStr = dateForDay[current];
+  const isToday = current === dayKeyOf(today);
+
+  document.getElementById("day-name").textContent = day.name + (isToday ? " — today" : "");
+  document.getElementById("day-theme").textContent = day.theme;
+  document.getElementById("checks-title").textContent =
+    (isToday ? "Today's" : day.name + "'s") + " non-negotiables";
+
+  const blocksEl = document.getElementById("blocks");
+  blocksEl.innerHTML = "";
+  day.blocks.forEach(([time, cat, title, note]) => {
+    const div = document.createElement("div");
+    div.className = "block";
+    div.innerHTML = `<div class="time">${time}</div><div class="rail" style="background:var(--${cat})"></div>` +
+      `<div class="what"><b>${title}</b>${note ? `<small>${note}</small>` : ""}</div>`;
+    blocksEl.appendChild(div);
+  });
+
+  const state = loadChecks(dateStr, current);
+  const checksEl = document.getElementById("checks");
+  checksEl.innerHTML = "";
+  day.checks.forEach((label, i) => {
+    const row = document.createElement("label");
+    row.className = "check" + (state[i] ? " done" : "");
+    const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = state[i];
+    cb.onchange = () => {
+      const cur = loadChecks(dateStr, current);
+      cur[i] = cb.checked;
+      saveChecks(dateStr, cur);
+      render();
+    };
+    const span = document.createElement("span");
+    span.textContent = label;
+    row.appendChild(cb); row.appendChild(span);
+    checksEl.appendChild(row);
+  });
+
+  const done = state.filter(Boolean).length, total = state.length;
+  document.getElementById("bar-fill").style.width = (total ? (100*done/total) : 0) + "%";
+  document.getElementById("bar-label").textContent = `${done} / ${total}`;
+
+  renderStreak();
+}
+render();
+</script>
+</body>
+</html>

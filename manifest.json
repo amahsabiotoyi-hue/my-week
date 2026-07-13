@@ -1,0 +1,13 @@
+{
+  "name": "Sab's Week — The Standard",
+  "short_name": "The Standard",
+  "description": "Daily schedule and non-negotiables tracker",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f9f9f7",
+  "theme_color": "#2a78d6",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
